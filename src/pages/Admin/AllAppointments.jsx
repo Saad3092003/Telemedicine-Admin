@@ -7,7 +7,7 @@ import { AppContext } from "../../context/AppContext";
 const AllAppointments = () => {
   const { aToken, appointments, cancelAppointment, getAllAppointments } =
     useContext(AdminContext);
-  const { slotDateFormat, calculateAge, currency } = useContext(AppContext);
+  const { slotDateFormat, currency } = useContext(AppContext);
 
   useEffect(() => {
     if (aToken) {
@@ -23,7 +23,7 @@ const AllAppointments = () => {
         <div className="hidden sm:grid grid-cols-[0.5fr_3fr_1fr_3fr_3fr_1fr_1fr] grid-flow-col py-3 px-6 border-b">
           <p>#</p>
           <p>Patient</p>
-          <p>Age</p>
+          <p>Payment</p>
           <p>Date & Time</p>
           <p>Doctor</p>
           <p>Fees</p>
@@ -43,7 +43,7 @@ const AllAppointments = () => {
               />{" "}
               <p>{item.userData.name}</p>
             </div>
-            <p className="max-sm:hidden">{calculateAge(item.userData.dob)}</p>
+            <p className="max-sm:hidden">{item.payment ? "Paid" : "Unpaid"}</p>
             <p>
               {slotDateFormat(item.slotDate)}, {item.slotTime}
             </p>

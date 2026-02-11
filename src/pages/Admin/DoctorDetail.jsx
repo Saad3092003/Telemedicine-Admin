@@ -32,6 +32,7 @@ const DoctorDetail = () => {
       const { data } = await axios.post(
         `${backendUrl}/api/admin/doctor/kyc-status`,
         { doctorId, status },
+        { headers: { aToken: localStorage.getItem("aToken") } },
       );
       if (data.success) {
         toast.success(`Doctor ${status}`);
@@ -55,21 +56,21 @@ const DoctorDetail = () => {
         {/* LEFT – PROFILE CARD */}
         <div className="bg-white rounded-xl shadow p-6">
           <img
-            src={doctor.image}
-            alt={doctor.name}
+            src={doctor?.image}
+            alt={doctor?.name}
             className="w-40 h-40 rounded-full mx-auto object-cover border"
           />
           <h2 className="text-xl font-semibold text-center mt-4">
-            {doctor.name}
+            {doctor?.name}
           </h2>
-          <p className="text-center text-gray-500">{doctor.speciality}</p>
+          <p className="text-center text-gray-500">{doctor?.speciality}</p>
 
           <div className="mt-6 space-y-2 text-sm">
-            <Info label="Email" value={doctor.email} />
-            <Info label="Phone" value={doctor.phone} />
-            <Info label="Degree" value={doctor.degree} />
-            <Info label="Experience" value={`${doctor.experience} yrs`} />
-            <Info label="Fees" value={`₹${doctor.fees}`} />
+            <Info label="Email" value={doctor?.email} />
+            <Info label="Phone" value={doctor?.phone} />
+            <Info label="Degree" value={doctor?.degree} />
+            <Info label="Experience" value={`${doctor?.experience} yrs`} />
+            <Info label="Fees" value={`₹${doctor?.fees}`} />
             <Info label="Status" value={doctor?.status} highlight />
           </div>
         </div>
@@ -78,14 +79,14 @@ const DoctorDetail = () => {
         <div className="lg:col-span-2 space-y-6">
           {/* ABOUT */}
           <Card title="About Doctor">
-            <p className="text-sm text-gray-600">{doctor.about}</p>
+            <p className="text-sm text-gray-600">{doctor?.about}</p>
           </Card>
 
           {/* ADDRESS */}
           <Card title="Address">
             <p className="text-sm text-gray-600">
-              {doctor.address?.line1}, {doctor.address?.city},{" "}
-              {doctor.address?.state} – {doctor.address?.pincode}
+              {doctor?.address?.line1}, {doctor?.address?.city},{" "}
+              {doctor?.address?.state} – {doctor?.address?.pincode}
             </p>
           </Card>
 
@@ -106,7 +107,9 @@ const DoctorDetail = () => {
           {/* ACTION BAR */}
           {doctor?.status === "pending" && (
             <div className="sticky bottom-4 bg-yellow-100 border flex  justify-between gap-4 rounded-xl shadow p-4 ">
-              <p className="text-gray-600 mt-2">Waiting for approval</p>
+              <p className="text-gray-600 mt-2">
+                Waiting {doctor?.status} for approval
+              </p>
               <div className="flex justify-end gap-4">
                 <button
                   onClick={() => updateStatus("rejected")}
@@ -141,7 +144,7 @@ const Card = ({ title, children }) => (
 );
 
 const Info = ({ label, value, highlight }) => (
-  <p className="flex justify-between">
+  <p className="flex justify-between gap-16">
     <span className="font-medium">{label}</span>
     <span
       className={`${
