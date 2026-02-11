@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { assets } from "../../assets/assets";
 import { useContext } from "react";
 import { AdminContext } from "../../context/AdminContext";
@@ -8,6 +8,12 @@ const AllAppointments = () => {
   const { aToken, appointments, cancelAppointment, getAllAppointments } =
     useContext(AdminContext);
   const { slotDateFormat, currency } = useContext(AppContext);
+  const [showCanvas, setShowCanvas] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const openOffcanvas = (appointment) => {
+    setSelectedAppointment(appointment);
+    setShowCanvas(true);
+  };
 
   useEffect(() => {
     if (aToken) {
@@ -44,9 +50,13 @@ const AllAppointments = () => {
               <p>{item.userData.name}</p>
             </div>
             <p className="max-sm:hidden">{item.payment ? "Paid" : "Unpaid"}</p>
-            <p>
+            <p
+              onClick={() => openOffcanvas(item)}
+              className="cursor-pointer text-primary hover:underline"
+            >
               {slotDateFormat(item.slotDate)}, {item.slotTime}
             </p>
+
             <div className="flex items-center gap-2">
               <img
                 src={item.docData.image}
@@ -74,8 +84,126 @@ const AllAppointments = () => {
           </div>
         ))}
       </div>
+      {showCanvas && (
+        <AppointmentOffcanvas
+          appointment={selectedAppointment}
+          onClose={() => setShowCanvas(false)}
+          currency={currency}
+          slotDateFormat={slotDateFormat}
+        />
+      )}
     </div>
   );
 };
+
+const AppointmentOffcanvas = ({
+  appointment,
+  onClose,
+  currency,
+  slotDateFormat,
+}) => {
+  const {
+    slotDate,
+    slotTime,
+    symptoms,
+    purpose,
+    amount,
+    payment,
+    userData,
+    docData,
+  } = appointment;
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose} />
+
+      {/* Panel */}
+      <div className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-white z-50 shadow-xl overflow-y-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center p-4 border-b">
+          <h3 className="text-lg font-semibold">Appointment Details</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-black text-xl"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="p-4 space-y-5 text-sm">
+          {/* DATE */}
+          <Section title="Schedule">
+            <Info
+              label="Appointment Date"
+              value={`${slotDateFormat(slotDate)}, ${slotTime}`}
+            />
+          </Section>
+
+          {/* PATIENT */}
+          <Section title="Patient">
+            <ProfileRow image={userData.image} name={userData.name} />
+            <Info label="Email" value={userData.email} />
+            <Info label="Phone" value={userData.phone} />
+            <Info label="Gender" value={userData.gender} />
+            <Info label="DOB" value={userData.dob} />
+          </Section>
+
+          {/* DOCTOR */}
+          <Section title="Doctor">
+            <ProfileRow image={docData.image} name={docData.name} />
+            <Info label="Speciality" value={docData.speciality} />
+            <Info label="Degree" value={docData.degree} />
+            <Info label="Experience" value={docData.experience} />
+          </Section>
+
+          {/* MEDICAL */}
+          <Section title="Medical Info">
+            <Info label="Symptoms" value={symptoms || "—"} />
+            <Info label="Purpose" value={purpose || "—"} />
+          </Section>
+
+          {/* PAYMENT */}
+          <Section title="Payment">
+            <Info label="Amount" value={`${currency}${amount}`} />
+            <Info
+              label="Status"
+              value={payment ? "Paid" : "Unpaid"}
+              highlight
+            />
+          </Section>
+        </div>
+      </div>
+    </>
+  );
+};
+
+const Section = ({ title, children }) => (
+  <div className="border rounded-lg p-3">
+    <p className="font-medium mb-2">{title}</p>
+    <div className="space-y-1">{children}</div>
+  </div>
+);
+
+const Info = ({ label, value, highlight }) => (
+  <p className="flex justify-between">
+    <span className="text-gray-500">{label}</span>
+    <span className={highlight ? "font-semibold text-primary" : ""}>
+      {value}
+    </span>
+  </p>
+);
+
+const ProfileRow = ({ image, name }) => (
+  <div className="flex items-center gap-3 mb-2">
+    <img
+      src={image}
+      alt=""
+      className="w-10 h-10 rounded-full object-cover bg-gray-200"
+    />
+    <p className="font-medium">{name}</p>
+  </div>
+);
 
 export default AllAppointments;
